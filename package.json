@@ -1,0 +1,29 @@
+{
+  "name": "new-app",
+  "version": "1.0.0",
+  "license": "UNLICENSED",
+  "scripts": {
+    "shopify": "shopify",
+    "build": "shopify app build",
+    "dev": "npm run dev -w frontend",
+    "info": "shopify app info",
+    "generate": "shopify app generate",
+    "deploy": "shopify app deploy",
+    "prisma:migrate": "npx prisma migrate dev"
+  },
+  "trustedDependencies": [
+    "@shopify/plugin-cloudflare"
+  ],
+  "author": "lucta",
+  "private": true,
+  "workspaces": [
+    "extensions/*",
+    "frontend"
+  ],
+  "devDependencies": {
+    "prisma": "^6.17.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.17.1"
+  }
+}
