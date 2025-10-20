@@ -1,78 +1,91 @@
-# Shopify App Template - Extension only
+# Hướng dẫn Cài đặt và Chạy Dự án Shopify App
 
-This is a template for building an [extension-only Shopify app](https://shopify.dev/docs/apps/build/app-extensions/build-extension-only-app). It contains the basics for building a Shopify app that uses only app extensions.
+Đây là hướng dẫn chi tiết để cài đặt và chạy ứng dụng Shopify này, bao gồm cả frontend React và các extension.
 
-This template doesn't include a server or the ability to embed a page in the Shopify Admin. If you want either of these capabilities, choose the [Remix app template](https://github.com/Shopify/shopify-app-template-remix) instead.
+## Yêu cầu
 
-Whether you choose to use this template or another one, you can use your preferred package manager and the Shopify CLI with [these steps](#installing-the-template).
+1.  **Node.js**: Đảm bảo bạn đã cài đặt phiên bản LTS mới nhất.
+2.  **Shopify CLI**: Cài đặt công cụ dòng lệnh của Shopify. Hướng dẫn có thể được tìm thấy [tại đây](https://shopify.dev/docs/apps/tools/cli).
+3.  **Tài khoản Shopify Partner**: Cần thiết để tạo và quản lý ứng dụng.
+4.  **Development Store**: Một cửa hàng để thử nghiệm ứng dụng của bạn.
 
-## Benefits
+## Cài đặt
 
-Shopify apps are built on a variety of Shopify tools to create a great merchant experience. The [create an app](https://shopify.dev/docs/apps/getting-started/create) tutorial in our developer documentation will guide you through creating a Shopify app.
+1.  **Sao chép (Clone) Repository**:
 
-This app template does little more than install the CLI and scaffold a repository.
+    ```bash
+    git clone <URL_REPOSITORY_CUA_BAN>
+    cd new-app
+    ```
 
-## Getting started
+2.  **Cài đặt các gói phụ thuộc (Dependencies)**:
+    Dự án này có các gói phụ thuộc ở cả thư mục gốc và thư mục `frontend`. Bạn cần cài đặt ở cả hai nơi.
 
-### Requirements
+    - **Thư mục gốc**:
+      ```bash
+      npm install
+      ```
+    - **Thư mục Frontend**:
+      ```bash
+      cd frontend
+      npm install
+      cd ..
+      ```
 
-1. You must [download and install Node.js](https://nodejs.org/en/download/) if you don't already have it.
-1. You must [create a Shopify partner account](https://partners.shopify.com/signup) if you don’t have one.
-1. You must create a store for testing if you don't have one, either a [development store](https://help.shopify.com/en/partners/dashboard/development-stores#create-a-development-store) or a [Shopify Plus sandbox store](https://help.shopify.com/en/partners/dashboard/managing-stores/plus-sandbox-store).
+## Chạy ứng dụng ở chế độ phát triển (Development)
 
-### Installing the template
+Để khởi động ứng dụng, bạn cần sử dụng Shopify CLI. Lệnh này sẽ tự động khởi động cả backend, frontend (Vite) và các extension.
 
-This template can be installed using your preferred package manager:
+Từ thư mục gốc của dự án (`new-app`), chạy lệnh sau:
 
-Using yarn:
-
-```shell
-yarn create @shopify/app
+```bash
+shopify app dev --use-localhost
 ```
 
-Using npm:
+**Lưu ý quan trọng:**
 
-```shell
-npm init @shopify/app@latest
-```
+- Cờ `--use-localhost` là **bắt buộc** để tránh các sự cố kết nối với Cloudflare tunnel. Lệnh này sẽ chạy ứng dụng trên máy cục bộ của bạn.
+- Shopify CLI sẽ cung cấp một URL xem trước để bạn có thể cài đặt và thử nghiệm ứng dụng trên development store của mình.
 
-Using pnpm:
+## Khắc phục sự cố (Troubleshooting)
 
-```shell
-pnpm create @shopify/app@latest
-```
+### Lỗi `EADDRINUSE: address already in use`
 
-This will clone the template and install the required dependencies.
+Lỗi này xảy ra khi một cổng (port) cần thiết đã bị một tiến trình khác chiếm dụng.
 
-#### Local Development
+1.  **Tìm tiến trình đang chiếm cổng**:
+    Mở PowerShell và chạy lệnh sau, thay `<PORT>` bằng số cổng bị báo lỗi (ví dụ: `9293`):
 
-[The Shopify CLI](https://shopify.dev/docs/apps/tools/cli) connects to an app in your Partners dashboard. It provides environment variables and runs commands in parallel.
+    ```powershell
+    netstat -ano | findstr ":<PORT>"
+    ```
 
-You can develop locally using your preferred package manager. Run one of the following commands from the root of your app.
+    Lệnh này sẽ trả về một dòng chứa ID của tiến trình (PID) ở cột cuối cùng.
 
-Using yarn:
+2.  **Dừng tiến trình**:
+    Sử dụng PID bạn vừa tìm thấy để dừng tiến-trình:
 
-```shell
-yarn dev
-```
+    ```powershell
+    taskkill /PID <PID_CUA_BAN> /F
+    ```
 
-Using npm:
+3.  **Thử lại**:
+    Chạy lại lệnh `shopify app dev --use-localhost`.
 
-```shell
-npm run dev
-```
+### Lỗi `'vite' is not recognized`
 
-Using pnpm:
+Lỗi này có nghĩa là Vite chưa được cài đặt đúng cách trong thư mục `frontend`.
 
-```shell
-pnpm run dev
-```
-
-Open the URL generated in your console. Once you grant permission to the app, you can start development (such as generating extensions).
-
-## Developer resources
-
-- [Introduction to Shopify apps](https://shopify.dev/docs/apps/getting-started)
-- [App extensions](https://shopify.dev/docs/apps/build/app-extensions)
-- [Extension only apps](https://shopify.dev/docs/apps/build/app-extensions/build-extension-only-app)
-- [Shopify CLI](https://shopify.dev/docs/apps/tools/cli)
+1.  Di chuyển vào thư mục `frontend`:
+    ```bash
+    cd frontend
+    ```
+2.  Cài đặt Vite và các gói liên quan:
+    ```bash
+    npm install vite @vitejs/plugin-react --save-dev
+    ```
+3.  Quay lại thư mục gốc và thử lại:
+    ```bash
+    cd ..
+    shopify app dev --use-localhost
+    ```
