@@ -1,91 +1,124 @@
-# Hướng dẫn Cài đặt và Chạy Dự án Shopify App
+# Quy trình Xây dựng Ứng dụng Shopify từ đầu
 
-Đây là hướng dẫn chi tiết để cài đặt và chạy ứng dụng Shopify này, bao gồm cả frontend React và các extension.
+Tài liệu này mô tả chi tiết các bước để xây dựng một ứng dụng Shopify hoàn chỉnh từ một template trống, bao gồm frontend (React), backend (Express), và theme extension.
 
-## Yêu cầu
+---
 
-1.  **Node.js**: Đảm bảo bạn đã cài đặt phiên bản LTS mới nhất.
-2.  **Shopify CLI**: Cài đặt công cụ dòng lệnh của Shopify. Hướng dẫn có thể được tìm thấy [tại đây](https://shopify.dev/docs/apps/tools/cli).
-3.  **Tài khoản Shopify Partner**: Cần thiết để tạo và quản lý ứng dụng.
-4.  **Development Store**: Một cửa hàng để thử nghiệm ứng dụng của bạn.
+### **Bước 1: Khởi tạo ứng dụng Shopify trống**
 
-## Cài đặt
+Bắt đầu bằng cách tạo một cấu trúc ứng dụng Shopify cơ bản không có template sẵn.
 
-1.  **Sao chép (Clone) Repository**:
+```bash
+shopify app init --template none
+```
+
+Sau khi khởi tạo xong, cài đặt các gói phụ thuộc ở thư mục gốc:
+
+```bash
+npm install
+```
+
+---
+
+### **Bước 2: Tạo Theme Extension**
+
+Thêm một module theme extension vào ứng dụng của bạn.
+
+```bash
+shopify generate extension theme
+```
+
+---
+
+### **Bước 3: Thiết lập Frontend với React + Vite**
+
+1.  Tạo thư mục `frontend`.
+2.  Bên trong thư mục `frontend`, chạy lệnh sau để khởi tạo một dự án React bằng Vite:
 
     ```bash
-    git clone <URL_REPOSITORY_CUA_BAN>
-    cd new-app
+    npm create vite@latest . -- --template react
     ```
 
-2.  **Cài đặt các gói phụ thuộc (Dependencies)**:
-    Dự án này có các gói phụ thuộc ở cả thư mục gốc và thư mục `frontend`. Bạn cần cài đặt ở cả hai nơi.
+---
 
-    - **Thư mục gốc**:
-      ```bash
-      npm install
-      ```
-    - **Thư mục Frontend**:
-      ```bash
-      cd frontend
-      npm install
-      cd ..
-      ```
+### **Bước 4: Thiết lập Backend với Node.js + Express**
 
-## Chạy ứng dụng ở chế độ phát triển (Development)
+1.  Tạo thư mục `backend`.
+2.  Bên trong thư mục `backend`, khởi tạo một dự án Node.js và cài đặt Express:
 
-Để khởi động ứng dụng, bạn cần sử dụng Shopify CLI. Lệnh này sẽ tự động khởi động cả backend, frontend (Vite) và các extension.
+    ```bash
+    npm init -y
+    npm install express --save
+    ```
 
-Từ thư mục gốc của dự án (`new-app`), chạy lệnh sau:
+3.  Tạo một tệp tin có tên `server.js` bên trong thư mục `backend`.
+
+---
+
+### **Bước 5: Cấu hình cho Frontend (shopify.web.toml)**
+
+Trong **thư mục gốc** của dự án, tạo một tệp tin `shopify.web.toml` để Shopify CLI biết cách quản lý frontend của bạn.
+
+```toml
+# shopify.web.toml (trong thư mục gốc)
+
+roles = ["frontend"]
+
+[directories]
+app = "frontend"
+
+auth_callback_path = ["/custom/path1", "/custom/path2"]
+
+webhooks_path = "/api/webhooks"
+
+[commands]
+dev = "npm run dev"
+build = "npm run build"
+```
+
+---
+
+### **Bước 6: Cấu hình cho Backend (shopify.web.toml)**
+
+Trong **thư mục `backend`**, tạo một tệp tin `shopify.web.toml` khác để định nghĩa vai trò backend.
+
+```toml
+# backend/shopify.web.toml
+
+roles = ["backend"]
+
+[commands]
+dev = "npm run dev"
+```
+
+---
+
+### **Bước 7: Cập nhật cấu hình Vite**
+
+Trong thư mục `frontend`, mở tệp `vite.config.js` và thêm vào khối `server`. Điều này giúp Vite tương thích với cách Shopify CLI quản lý các cổng (port).
+
+```javascript
+// frontend/vite.config.js
+
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    port: parseInt(process.env.PORT || "3000", 10),
+  },
+});
+```
+
+---
+
+### **Bước 8: Chạy ứng dụng**
+
+Cuối cùng, từ **thư mục gốc** của dự án, khởi động tất cả các dịch vụ ở chế độ phát triển.
 
 ```bash
 shopify app dev --use-localhost
 ```
 
-**Lưu ý quan trọng:**
-
-- Cờ `--use-localhost` là **bắt buộc** để tránh các sự cố kết nối với Cloudflare tunnel. Lệnh này sẽ chạy ứng dụng trên máy cục bộ của bạn.
-- Shopify CLI sẽ cung cấp một URL xem trước để bạn có thể cài đặt và thử nghiệm ứng dụng trên development store của mình.
-
-## Khắc phục sự cố (Troubleshooting)
-
-### Lỗi `EADDRINUSE: address already in use`
-
-Lỗi này xảy ra khi một cổng (port) cần thiết đã bị một tiến trình khác chiếm dụng.
-
-1.  **Tìm tiến trình đang chiếm cổng**:
-    Mở PowerShell và chạy lệnh sau, thay `<PORT>` bằng số cổng bị báo lỗi (ví dụ: `9293`):
-
-    ```powershell
-    netstat -ano | findstr ":<PORT>"
-    ```
-
-    Lệnh này sẽ trả về một dòng chứa ID của tiến trình (PID) ở cột cuối cùng.
-
-2.  **Dừng tiến trình**:
-    Sử dụng PID bạn vừa tìm thấy để dừng tiến-trình:
-
-    ```powershell
-    taskkill /PID <PID_CUA_BAN> /F
-    ```
-
-3.  **Thử lại**:
-    Chạy lại lệnh `shopify app dev --use-localhost`.
-
-### Lỗi `'vite' is not recognized`
-
-Lỗi này có nghĩa là Vite chưa được cài đặt đúng cách trong thư mục `frontend`.
-
-1.  Di chuyển vào thư mục `frontend`:
-    ```bash
-    cd frontend
-    ```
-2.  Cài đặt Vite và các gói liên quan:
-    ```bash
-    npm install vite @vitejs/plugin-react --save-dev
-    ```
-3.  Quay lại thư mục gốc và thử lại:
-    ```bash
-    cd ..
-    shopify app dev --use-localhost
-    ```
+**Lưu ý:** Cờ `--use-localhost` là cần thiết để tránh các sự cố kết nối và chạy ứng dụng trực tiếp trên máy của bạn.
