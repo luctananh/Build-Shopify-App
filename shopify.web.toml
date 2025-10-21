@@ -8,5 +8,5 @@ auth_callback_path = ["/custom/path1", "/custom/path2"]
 webhooks_path = "/api/webhooks"
 
 [commands]
-dev = "npm run dev"
-build = "npm run build"
+dev = "npm --prefix frontend run dev"
+build = "npm --prefix frontend run build"
