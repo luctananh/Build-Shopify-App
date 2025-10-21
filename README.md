@@ -60,8 +60,6 @@ shopify generate extension theme
 Trong **thư mục gốc** của dự án, tạo một tệp tin `shopify.web.toml` để Shopify CLI biết cách quản lý frontend của bạn.
 
 ```toml
-# shopify.web.toml (trong thư mục gốc)
-
 roles = ["frontend"]
 
 [directories]
@@ -72,8 +70,8 @@ auth_callback_path = ["/custom/path1", "/custom/path2"]
 webhooks_path = "/api/webhooks"
 
 [commands]
-dev = "npm run dev"
-build = "npm run build"
+dev = "npm --prefix frontend run dev"
+build = "npm --prefix frontend run build"
 ```
 
 ---
