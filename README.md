@@ -50,8 +50,11 @@ shopify generate extension theme
     npm init -y
     npm install express --save
     ```
-
-3.  Tạo một tệp tin có tên `server.js` bên trong thư mục `backend`.
+3. cập nhật trong `package.json` của `backend`
+    ```
+    "dev": "node server.js"
+    ```
+4.  Tạo một tệp tin có tên `server.js` bên trong thư mục `backend`.
 
 ---
 
